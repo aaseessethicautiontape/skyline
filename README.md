@@ -1,81 +1,103 @@
-# Skyline — Lab 3, Week 1
+# AI Project Lab 3 — Week 1: Fix the Lock
 
-Welcome to Lab 3! In Lab 2, you made your own project. Bring that project with you today: you will use it as the starting point for this lab.
+Last term ended with a hacked leaderboard. Today you will try the same cheat on your own Level 2 project, lock the database, and prove that the cheat now bounces off.
 
-This repository is a working example called **Skyline**. It is a one-button tower-stacking game where every player's best tower can appear in a shared class city. Use it to see one possible way to organise a React project with Firebase, then make the ideas your own in your Lab 2 project.
+**Big idea:** code in the browser belongs to the user. The client can ask to save a score, but the backend must decide whether that write is allowed.
 
-## What you are learning
+Skyline is the reference app for this lab. It is a tower-stacking game where every player's best tower appears in a shared class city. Your own Level 2 leaderboard project is the project you will secure.
 
-By the end of the lab, you should be able to:
+## Bring before class
 
-- add sign-in to a React app;
-- save information for a signed-in user in Firestore;
-- read updates from Firestore as they happen; and
-- deploy a web app so other people can try it.
+- Your Level 2 leaderboard project
+- The Google account that owns its Firebase project
+- VS Code and Codex, both signed in
+- Your GitHub and Vercel logins
 
-## The Skyline example
+If anything is missing, tell your teacher at the start of class.
 
-Skyline includes:
+## Today's plan
 
-- Google sign-in and guest-name sign-in;
-- a game controlled with a click, tap, or the Space key;
-- a personal best score for each player; and
-- a live city screen that shows the class's best towers.
+| Session | Mission | Time |
+| --- | --- | --- |
+| 1 | Replay the hack | 15 min |
+| 2 | Write and publish the rules | 25 min |
+| 3 | Tamper again and get refused | 20 min |
 
-The code is split into small pieces so it is easier to explore:
+## 1. Replay the hack
 
-| Place | What it does |
-| --- | --- |
-| `src/screens/` | The Sign In, Play, City, and Profile screens |
-| `src/game/` | The tower game and its drawing code |
-| `src/data.js` | Reading and saving player scores |
-| `src/firebase.js` | Connecting the app to Firebase |
-| `BUILD-NOTES.md` | Extra notes about how the example is built |
+First, see the problem for yourself.
 
-## Your Lab 3 task
+1. Open your Level 2 project in VS Code.
+2. Ask Codex: `Add a temporary line so I can call my submitScore function from the browser console as app.submitScore(number).`
+3. Start the app with `npm run dev`, open it, and sign in.
+4. Open the browser console (Mac: <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>J</kbd>).
+5. Type `app.submitScore(999999)` and press Enter.
+6. Open your leaderboard and Firestore data. Take a screenshot showing the fake score.
 
-Work in **your own Lab 2 project**. Do not try to copy Skyline exactly. Choose a small feature that makes sense for your project, such as a high-score board, saved drawings, favourite recipes, completed challenges, or shared messages.
+A real attacker does not need the temporary console door—they can change or call any browser code. The door just lets us practise the attack quickly.
 
-1. Make sure your Lab 2 project still runs.
-2. Add Firebase Authentication or anonymous sign-in.
-3. Decide what one piece of information each player will save.
-4. Save that information in Firestore.
-5. Show the saved information in your app.
-6. Test with a classmate and deploy when it is ready.
+## 2. Write the lock
 
-Keep it small. A working version with one good feature is better than lots of half-finished features.
+Firestore Security Rules run on Google's servers before every read and write. A browser trick cannot skip them.
 
-## Running this example
+Create a `firestore.rules` file. Ask Codex:
 
-You need [Node.js](https://nodejs.org/) installed on your computer.
+> Create firestore.rules. Anyone can read scores. A signed-in player may create or update only scores/{their uid} and add runs inside it. Score must be a whole number from 0 to 3000. Nobody deletes. Explain each line.
+
+Change `3000` to the highest honest score your game can actually produce. Read every explanation; only publish rules you understand.
+
+For Skyline, the rules need to cover both paths below. A rule for the first path does **not** automatically protect the second one.
+
+```text
+scores/{uid}
+scores/{uid}/runs/{runId}
+```
+
+The score-writing code is in `src/data.js`: `submitScore(score)` saves each run, then saves a new best score. The rule must allow that honest behaviour while refusing writes for another player or scores outside your allowed range.
+
+In Firebase Console, open **Firestore Database → Rules**, replace the old open rule, paste your rules, and click **Publish**. Then delete the fake `999999` document from the **Data** tab. The Firebase Console is an owner's tool, so Security Rules do not stop you there.
+
+## 3. Tamper again
+
+1. Reload your app.
+2. Open the browser console and run `app.submitScore(999999)` again.
+3. You should see `Missing or insufficient permissions` / `PERMISSION_DENIED`.
+4. Refresh Firestore Data: the fake score should not exist.
+5. Play one real round and check that an honest score still saves.
+6. Take an after screenshot showing the refused write.
+
+`PERMISSION_DENIED` is good news today: it proves the lock is working. If an honest score is also refused, the rule is stricter than the data your app sends. Give Codex the console error and your rules, then ask which check failed.
+
+## Finish and hand in
+
+- Remove the temporary `app.submitScore` console door.
+- Put your before and after screenshots in a `security/` folder in your project.
+- Commit `firestore.rules`, the screenshots, and the removal of the temporary line.
+- Push to GitHub and deploy your updated project.
+
+## Done checklist
+
+- [ ] `app.submitScore(999999)` appeared on my leaderboard before the fix.
+- [ ] My published rules cover both `scores` and `scores/{uid}/runs`.
+- [ ] The same fake score now fails with `Missing or insufficient permissions`.
+- [ ] An honest game round still saves its score.
+- [ ] I saved before and after screenshots.
+- [ ] My rules, screenshots, and code changes are committed and pushed.
+
+## Think like a security engineer
+
+The maximum-score rule stops `999999`, but could a player still submit a fake score just below the cap? Yes. A browser client can still lie about what happened in the game. This week is about moving the basic lock to the backend; later in Lab 3, you will build servers that decide the important things themselves.
+
+## Run the Skyline reference app
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the local address shown in the terminal, usually `http://localhost:5173`.
-
-To check the project before deployment:
+Before deployment, check your work with:
 
 ```bash
 npm run lint
 npm run build
 ```
-
-## Firebase reminder
-
-Firebase lets an app recognise players and save shared data. Before using Firebase in your own project, create or use a Firebase project and add your app's configuration in `src/firebase.js` (or use environment variables if your instructor asks you to).
-
-Never share passwords, private keys, or secret tokens in your code or in a public GitHub repository. The Firebase web configuration used by a browser app is not a password, but your Firestore rules decide who can read and change your data.
-
-For this first week, focus on getting data to save and load. You will learn how to make Firestore rules safer in a later lab.
-
-## Getting unstuck
-
-- Read error messages slowly — they often name the file and line that need attention.
-- Change one thing at a time, then refresh and test it.
-- Ask a classmate to explain what they see before asking them to fix it for you.
-- Ask your instructor for help if you are stuck for more than a few minutes.
-
-Have fun building something that feels like yours!
