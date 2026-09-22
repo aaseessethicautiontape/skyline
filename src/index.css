@@ -1,0 +1,73 @@
+:root {
+  --night: #0a1030;
+  --night-deep: #050818;
+  --night-panel: #141b44;
+  --night-line: #26306a;
+  --window: #ffc94d;
+  --window-hot: #ffe08a;
+  --window-glow: rgba(255, 201, 77, 0.45);
+  --text: #e9ecff;
+  --text-dim: #9aa3d6;
+  --danger: #ff7a7a;
+
+  font-family: 'Fredoka', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--night-deep);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(255, 201, 77, 0.12), transparent 60%),
+    linear-gradient(180deg, var(--night-deep) 0%, var(--night) 70%, #121a4a 100%);
+  background-attachment: fixed;
+}
+
+/* A faint skyline silhouette with lit windows along the bottom of every screen */
+body::after {
+  content: '';
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 140px;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.55;
+  background:
+    linear-gradient(var(--window) 0 0) 6% 58% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 9% 78% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 24% 40% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 27% 70% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 46% 30% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 49% 64% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 68% 52% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 86% 36% / 6px 8px no-repeat,
+    linear-gradient(var(--window) 0 0) 90% 74% / 6px 8px no-repeat,
+    linear-gradient(#03050f 0 0) 4% 100% / 9% 55% no-repeat,
+    linear-gradient(#03050f 0 0) 14% 100% / 7% 35% no-repeat,
+    linear-gradient(#03050f 0 0) 23% 100% / 8% 75% no-repeat,
+    linear-gradient(#03050f 0 0) 34% 100% / 6% 45% no-repeat,
+    linear-gradient(#03050f 0 0) 45% 100% / 9% 90% no-repeat,
+    linear-gradient(#03050f 0 0) 57% 100% / 7% 50% no-repeat,
+    linear-gradient(#03050f 0 0) 67% 100% / 8% 65% no-repeat,
+    linear-gradient(#03050f 0 0) 77% 100% / 6% 40% no-repeat,
+    linear-gradient(#03050f 0 0) 88% 100% / 9% 80% no-repeat,
+    linear-gradient(#03050f 0 0) 99% 100% / 6% 45% no-repeat;
+}
+
+button,
+input {
+  font: inherit;
+}
